@@ -172,7 +172,8 @@ app.use(cors({
     "http://127.0.0.1:5500",
     "http://localhost:4000",
     "http://127.0.0.1:4000", 
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "https://kickbarksmotoshop.onrender.com"
   ],
   credentials: true
 }));
