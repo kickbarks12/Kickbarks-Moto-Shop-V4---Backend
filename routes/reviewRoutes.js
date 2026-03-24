@@ -15,7 +15,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 // Add review
-router.post("/add-review", upload.array("images", 5), async (req, res) => {
+router.post("/reviews", upload.array("images", 5), async (req, res) => {
 
   try {
 

@@ -26,6 +26,11 @@
       required: true
     },
 avatar: String, // ⭐ Google profile picture
+avatarSource: {
+  type: String,
+  enum: ["google", "upload"],
+  default: "google"
+},
     mobile: {
       type: String,
       default: ""

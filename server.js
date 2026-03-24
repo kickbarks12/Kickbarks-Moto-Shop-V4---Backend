@@ -155,10 +155,12 @@ const app = express();
 
 app.disable("x-powered-by");
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: "Too many requests. Please try again later."
+  max: isDev ? 5000 : 100,
+  skip: (req) => req.method === "OPTIONS"
 });
 
 app.use("/api", apiLimiter);
@@ -169,7 +171,8 @@ app.use(cors({
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "http://localhost:4000",
-    "http://127.0.0.1:4000"
+    "http://127.0.0.1:4000", 
+    "http://localhost:8080"
   ],
   credentials: true
 }));
@@ -241,7 +244,9 @@ mongoose.connect(process.env.MONGO_URI)
     console.error("MongoDB connection failed:", err);
     process.exit(1);
   });
-
+app.get("/", (req, res) => {
+  res.send("Backend is running");
+});
 // Global error handler
 app.use((err, req, res, next) => {
   console.error("UNHANDLED ERROR:", err);

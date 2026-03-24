@@ -170,7 +170,7 @@ router.post("/forgot-password", loginLimiter, async (req, res) => {
     await user.save();
 
     const resetLink =
-`http://localhost:5500/reset-password.html?token=${token}`;
+`http://localhost:8080/reset-password.html?token=${token}`;
 
     // // EMAIL CONFIG
     // const transporter = nodemailer.createTransport({
@@ -252,7 +252,7 @@ router.get("/google/callback",
 
     req.session.userId = req.user._id;
 
-    res.redirect("http://localhost:5500/frontend/index.html");
+    res.redirect("http://localhost:8080/index.html");
   }
 );
 module.exports = router;

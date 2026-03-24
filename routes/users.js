@@ -28,10 +28,13 @@ router.post("/avatar", upload.single("avatar"), async (req, res) => {
     const avatarUrl = req.file.path;
 
     const user = await User.findByIdAndUpdate(
-      req.session.userId,
-      { avatar: avatarUrl },
-      { new: true }
-    );
+  req.session.userId,
+  {
+    avatar: avatarUrl,
+    avatarSource: "upload" // ✅ IMPORTANT
+  },
+  { new: true }
+);
 
     res.json({
       success: true,
