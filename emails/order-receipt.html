@@ -1,0 +1,224 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Order Receipt | Kickbarks Moto Shop</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+        Arial, sans-serif;
+      color: #111;
+    }
+
+    .wrapper {
+      max-width: 640px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .accent {
+      height: 6px;
+      background: #0d6efd;
+    }
+
+    .header {
+      padding: 24px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .header p {
+      margin: 6px 0 0;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .content {
+      padding: 28px;
+    }
+
+    .section {
+      margin-bottom: 26px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      color: #555;
+    }
+
+    .meta {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eaeaea;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .price {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .summary td {
+      border-bottom: none;
+      padding-top: 8px;
+    }
+
+    .total-row td {
+      padding-top: 14px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .total {
+      text-align: right;
+      color: #198754;
+    }
+
+    .trust {
+      background: #fafafa;
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .footer {
+      padding: 18px;
+      text-align: center;
+      font-size: 12px;
+      color: #777;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <!-- ACCENT -->
+    <div class="accent"></div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <h1>Kickbarks Moto Shop</h1>
+      <p>Official Order Receipt</p>
+    </div>
+
+    <div class="content">
+      <!-- ORDER INFO -->
+      <div class="section">
+        <div class="section-title">Order Information</div>
+        <div class="meta">
+          <strong>Receipt #:</strong> {{ORDER_NUMBER}}<br />
+          <strong>Order Date:</strong> {{ORDER_DATE}}
+        </div>
+      </div>
+
+      <!-- BILLING -->
+      <div class="section">
+        <div class="section-title">Billed To</div>
+        <div class="meta">
+          {{CUSTOMER_NAME}}<br />
+          {{CUSTOMER_EMAIL}}<br />
+          {{CUSTOMER_PHONE}}<br />
+          {{CUSTOMER_ADDRESS}}
+        </div>
+      </div>
+
+      <!-- ITEMS -->
+      <div class="section">
+        <div class="section-title">Items Purchased</div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th class="price">Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {{ORDER_ITEMS}}
+          </tbody>
+
+          <tfoot>
+            <tr class="summary">
+              <td>Subtotal</td>
+              <td class="price">₱{{SUBTOTAL}}</td>
+            </tr>
+            <tr class="summary">
+              <td>Shipping</td>
+              <td class="price">₱{{SHIPPING}}</td>
+            </tr>
+            <tr>
+              <td>Voucher Used:</td>
+              <td align="right">{{VOUCHER_CODE}}</td>
+            </tr>
+
+            <tr>
+              <td>Discount:</td>
+              <td align="right">₱{{DISCOUNT}}</td>
+            </tr>
+
+            <tr class="total-row">
+              <td>Total Paid</td>
+              <td class="total">₱{{ORDER_TOTAL}}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- TRUST -->
+      <div class="section">
+        <div class="trust">
+          ✔ Secure checkout<br />
+          ✔ Quality guaranteed<br />
+          ✔ Orders processed within 1–2 business days
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      © {{YEAR}} Kickbarks Moto Shop<br />
+      This receipt serves as proof of purchase.
+    </div>
+  </div>
+</body>
+
+</html>
