@@ -155,8 +155,8 @@ const app = express();
 
 app.disable("x-powered-by");
 
-const isDev = process.env.NODE_ENV !== "production";
-
+const isProd = process.env.NODE_ENV === "production";
+app.set("trust proxy", 1);
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: isDev ? 5000 : 100,
@@ -188,10 +188,11 @@ app.use(
     secret: process.env.SESSION_SECRET || "kickbarks_local_secret",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
-      secure: false,
-      sameSite: "lax",
+      secure: isProd, // ✅ REQUIRED for HTTPS
+      sameSite: isProd ? "none" : "lax", // ✅ REQUIRED for cross-domain
       maxAge: 1000 * 60 * 60 * 24 * 7
     }
   })
