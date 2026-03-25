@@ -141,7 +141,7 @@ const cors = require("cors");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
-
+const helmet = require("helmet");
 const passport = require("passport");
 require("./config/googleAuth");
 
@@ -163,8 +163,25 @@ const apiLimiter = rateLimit({
   skip: (req) => req.method === "OPTIONS"
 });
 
-app.use("/api", apiLimiter);
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProd ? 10 : 100,
+  skip: (req) => req.method === "OPTIONS",
+  message: { error: "Too many auth attempts. Please try again later." }
+});
 
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isProd ? 5 : 50,
+  skip: (req) => req.method === "OPTIONS",
+  message: { error: "Too many messages sent. Please try again later." }
+});
+
+app.use(helmet({
+  crossOriginResourcePolicy: false
+}));
+
+app.use("/api", apiLimiter);
 // Middleware
 app.use(cors({
   origin: [
@@ -213,8 +230,20 @@ if (!fs.existsSync(paymentPath)) {
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use((req, res, next) => {
+  if (
+    req.path.startsWith("/api/auth") ||
+    req.path.startsWith("/api/users") ||
+    req.path.startsWith("/api/orders") ||
+    req.path.startsWith("/api/cart")
+  ) {
+    res.setHeader("Cache-Control", "no-store");
+  }
+  next();
+});
+
 // API routes
-app.use("/api/auth", require("./routes/auth"));
+app.use("/api/auth", authLimiter, require("./routes/auth"));
 app.use("/api/products", require("./routes/products"));
 app.use("/api/orders", require("./routes/orders"));
 app.use("/api/users", require("./routes/users"));
@@ -225,7 +254,7 @@ app.use("/api/admin/orders", require("./routes/adminOrders"));
 app.use("/api/admin/users", adminUsersRoutes);
 app.use("/api", reviewRoutes);
 app.use("/api/cart", require("./routes/cart"));
-app.use("/api/contact", contactRoute);
+app.use("/api/contact", contactLimiter, contactRoute);
 
 // Serve local frontend and uploads
 app.use(express.static(path.join(__dirname, "../frontend")));
@@ -262,5 +291,5 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, () => {
-  console.log(`Kickbarks running locally on http://localhost:${PORT}`);
+  console.log(`Kickbarks server running on port ${PORT}`);
 });
