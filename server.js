@@ -159,7 +159,7 @@ const isProd = process.env.NODE_ENV === "production";
 app.set("trust proxy", 1);
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: isDev ? 5000 : 100,
+  max: isProd ? 100 : 5000,
   skip: (req) => req.method === "OPTIONS"
 });
 
