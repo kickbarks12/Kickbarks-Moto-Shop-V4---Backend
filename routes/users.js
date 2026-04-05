@@ -175,7 +175,7 @@ router.put("/update-profile", async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { email, mobile, address } = req.body;
+    const { email, mobile, address, birthday } = req.body;
 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
