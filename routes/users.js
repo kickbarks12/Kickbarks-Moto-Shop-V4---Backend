@@ -192,7 +192,8 @@ router.put("/update-profile", async (req, res) => {
       {
         email,
         mobile,
-        address
+        address,
+        birthday: birthday ? new Date(birthday) : null
       },
       { new: true }
     ).select("-password");
