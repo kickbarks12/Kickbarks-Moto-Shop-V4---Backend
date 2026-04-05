@@ -175,18 +175,24 @@ router.put("/update-profile", async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const { email, mobile } = req.body;
+    const { email, mobile, address } = req.body;
 
-    // validation
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    const existingUser = email ? await User.findOne({ email }) : null;
+
+    if (existingUser && existingUser._id.toString() !== req.session.userId) {
+      return res.status(400).json({ error: "Email already in use" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.session.userId,
       {
         email,
-        mobile
+        mobile,
+        address
       },
       { new: true }
     ).select("-password");
