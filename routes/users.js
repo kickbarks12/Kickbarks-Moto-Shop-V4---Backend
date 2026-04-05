@@ -169,5 +169,36 @@ router.get("/vouchers", async (req, res) => {
 
   res.json(vouchers);
 });
+router.put("/update-profile", async (req, res) => {
+  try {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
+    const { email, mobile } = req.body;
+
+    // validation
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.session.userId,
+      {
+        email,
+        mobile
+      },
+      { new: true }
+    ).select("-password");
+
+    res.json({
+      success: true,
+      user: updatedUser
+    });
+
+  } catch (err) {
+    console.error("UPDATE PROFILE ERROR:", err);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
+});
 module.exports = router;
