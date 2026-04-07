@@ -58,14 +58,22 @@ paymentMethod: {
   // ORDER ITEMS
   // ======================
   items: [
-    {
-      _id: String,
-      name: String,
-      price: Number,
-      qty: Number,
-      bike: String   // 🔥 ADD THIS LINE
+  {
+    _id: String,
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product"
+    },
+    name: String,
+    price: Number,
+    qty: Number,
+    bike: String,
+    image: {
+      type: String,
+      default: ""
     }
-  ],
+  }
+],
 
   // ======================
   // PRICE BREAKDOWN ✅
