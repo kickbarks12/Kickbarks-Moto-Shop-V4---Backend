@@ -175,41 +175,7 @@ if (availableStock < Number(item.qty)) {
 }
 
 }
-const normalizedItems = [];
 
-for (const item of items) {
-  const product = await Product.findById(item.productId || item._id);
-
-  if (!product) {
-    return res.status(400).json({
-      error: `Product not found`
-    });
-  }
-
-  const bike = item.bike || "";
-
-  let price = 0;
-
-  if (bike.toLowerCase().includes("mio")) price = product.price?.mio || 0;
-  else if (bike.toLowerCase().includes("aerox")) price = product.price?.aerox || 0;
-  else if (bike.toLowerCase().includes("click")) price = product.price?.click || 0;
-  else if (bike.toLowerCase().includes("adv")) price = product.price?.adv || 0;
-
-  const image =
-    item.image ||
-    product.image ||
-    product.images?.[0] ||
-    "";
-
-  normalizedItems.push({
-    productId: product._id,
-    name: product.name || item.name || "",
-    bike,
-    qty: Number(item.qty) || 1,
-    price,
-    image
-  });
-}
 const orderNumber = `KB-${Date.now()}-${Math.floor(Math.random()*900+100)}`;
     // 4️⃣ Create order
     const order = await Order.create({
@@ -217,7 +183,7 @@ const orderNumber = `KB-${Date.now()}-${Math.floor(Math.random()*900+100)}`;
   userId: user._id,
 
   // ITEMS & PRICES
-  items: normalizedItems,
+  items,
   subtotal,
   shipping: SHIPPING_FEE,
   discount,
