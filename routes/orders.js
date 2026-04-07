@@ -177,13 +177,38 @@ if (availableStock < Number(item.qty)) {
 }
 
 const orderNumber = `KB-${Date.now()}-${Math.floor(Math.random()*900+100)}`;
+const processedItems = [];
+
+for (const item of items) {
+  const product = await Product.findById(item.productId || item._id);
+
+  if (!product) continue;
+
+  const bike = (item.bike || "").toLowerCase();
+
+  let price = 0;
+
+  if (bike.includes("mio")) price = product.price?.mio || 0;
+  else if (bike.includes("aerox")) price = product.price?.aerox || 0;
+  else if (bike.includes("click")) price = product.price?.click || 0;
+  else if (bike.includes("adv")) price = product.price?.adv || 0;
+
+  processedItems.push({
+    productId: product._id,
+    name: product.name,
+    price,
+    qty: Number(item.qty),
+    bike: item.bike,
+    image: product.images?.[0] || "" // ✅ THIS FIXES EVERYTHING
+  });
+}
     // 4️⃣ Create order
     const order = await Order.create({
   orderNumber: orderNumber,
   userId: user._id,
 
   // ITEMS & PRICES
-  items,
+  items: processedItems,
   subtotal,
   shipping: SHIPPING_FEE,
   discount,
