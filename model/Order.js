@@ -65,9 +65,26 @@ paymentMethod: {
       ref: "Product"
     },
     name: String,
+
     price: Number,
+    originalPrice: {
+      type: Number,
+      default: 0
+    },
+
+    flashSale: {
+      type: Boolean,
+      default: false
+    },
+
+    flashSaleDiscount: {
+      type: Number,
+      default: 0
+    },
+
     qty: Number,
     bike: String,
+
     image: {
       type: String,
       default: ""

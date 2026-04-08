@@ -30,7 +30,7 @@ router.post("/", async (req, res) => {
       return res.status(401).json({ error: "Not logged in" });
     }
 
-    const items = req.body.items || [];
+    const items = req.body.cart || req.body.items || [];
 
     const cart = await Cart.findOneAndUpdate(
       { userId: req.session.userId },

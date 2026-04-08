@@ -80,25 +80,8 @@ if (recentOrder) {
 let subtotal = 0;
 
 for (const item of items) {
-
- const product = await Product.findById(item.productId || item._id);
-
-if (!product) {
-  return res.status(400).json({
-    error: `Product not found`
-  });
-}
-
-  const bike = (item.bike || "").toLowerCase();
-
-  let price = 0;
-
-  if (bike.includes("mio")) price = product.price?.mio || 0;
-  else if (bike.includes("aerox")) price = product.price?.aerox || 0;
-  else if (bike.includes("click")) price = product.price?.click || 0;
-  else if (bike.includes("adv")) price = product.price?.adv || 0;
-
   const qty = Number(item.qty);
+  const price = Number(item.price || 0); // ✅ USE CART PRICE
 
   subtotal += price * qty;
 }
@@ -186,21 +169,20 @@ for (const item of items) {
 
   const bike = (item.bike || "").toLowerCase();
 
-  let price = 0;
-
-  if (bike.includes("mio")) price = product.price?.mio || 0;
-  else if (bike.includes("aerox")) price = product.price?.aerox || 0;
-  else if (bike.includes("click")) price = product.price?.click || 0;
-  else if (bike.includes("adv")) price = product.price?.adv || 0;
-
   processedItems.push({
-    productId: product._id,
-    name: product.name,
-    price,
-    qty: Number(item.qty),
-    bike: item.bike,
-    image: product.images?.[0] || "" // ✅ THIS FIXES EVERYTHING
-  });
+  productId: product._id,
+  name: product.name,
+
+  // 🔥 USE CART VALUES (LOCK PRICE)
+  price: Number(item.price || 0),
+  originalPrice: Number(item.originalPrice || item.price || 0),
+  flashSale: item.flashSale === true,
+  flashSaleDiscount: Number(item.flashSaleDiscount || 0),
+
+  qty: Number(item.qty),
+  bike: item.bike,
+  image: product.images?.[0] || ""
+});
 }
     // 4️⃣ Create order
     const order = await Order.create({
