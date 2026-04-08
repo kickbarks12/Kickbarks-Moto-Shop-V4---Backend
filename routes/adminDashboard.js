@@ -57,7 +57,9 @@ orders.forEach(o=>{
     const pendingOrders = orders.filter(
       o => o.status === "Pending"
     ).length;
-
+const cancelledOrders = orders.filter(
+  o => o.status === "Cancelled"
+).length;
     const completedOrders = completedOrdersList.length;
 
     const totalProducts = await Product.countDocuments();
@@ -113,20 +115,20 @@ orders.forEach(o=>{
     ]);
 
     res.json({
-      totalSales,
-      totalOrders,
-      pendingOrders,
-      completedOrders,
-      totalProducts,
-      activeVouchers,
-      recentOrders,
-      salesByDay,
-      topProducts,
-      todaySales,
-ordersToday,
-productsSold,
-
-    });
+  totalSales,
+  totalOrders,
+  pendingOrders,
+  cancelledOrders,
+  completedOrders,
+  totalProducts,
+  activeVouchers,
+  recentOrders,
+  salesByDay,
+  topProducts,
+  todaySales,
+  ordersToday,
+  productsSold,
+});
   } catch (err) {
     console.error("ADMIN DASHBOARD ERROR:", err);
     res.status(500).json({ error: "Dashboard failed" });
