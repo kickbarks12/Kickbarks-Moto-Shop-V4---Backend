@@ -123,11 +123,26 @@ router.get("/export/csv", adminAuth, async (req, res) => {
     const orders = await Order.find();
 
     const csv = [
-      "Order Number,Total,Status,Date",
-      ...orders.map(o =>
-        `${o.orderNumber},${o.total},${o.status},${o.date.toISOString()}`
-      )
-    ].join("\n");
+  "Order Number,Customer Name,Email,Phone,Address,Items,Total,Status,Payment,Date",
+  ...orders.map(o => {
+    const items = (o.items || [])
+      .map(i => `${i.name} x${i.qty}${i.bike ? ` (${i.bike})` : ""}`)
+      .join(" | ");
+
+    return [
+      `"${o.orderNumber}"`,
+      `"${o.customerName || ""}"`,
+      `"${o.customerEmail || ""}"`,
+      `"${o.customerPhone || ""}"`,
+      `"${o.customerAddress || ""}"`,
+      `"${items}"`,
+      o.total || 0,
+      `"${o.status}"`,
+      `"${o.paymentMethod || "COD"}"`,
+      `"${new Date(o.date).toISOString()}"`
+    ].join(",");
+  })
+].join("\n");
 
     res.header("Content-Type", "text/csv");
     res.attachment("orders.csv");
