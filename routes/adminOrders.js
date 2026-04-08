@@ -83,7 +83,7 @@ router.get("/export/csv", adminAuth, async (req, res) => {
 });
 router.get("/orders/:id", async (req, res) => {
   try {
-    if (!req.session.adminId) {
+    if (!req.session.admin) {
       return res.status(401).json({ error: "Admin not logged in" });
     }
 
