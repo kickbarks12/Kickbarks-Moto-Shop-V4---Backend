@@ -11,31 +11,60 @@ const ReviewSchema = new mongoose.Schema({
   }
 });
 
-
 const ProductSchema = new mongoose.Schema({
   name: String,
+
   price: {
-  mio: { type: Number, default: 0 },
-  aerox: { type: Number, default: 0 },
-  click: { type: Number, default: 0 },
-  adv: { type: Number, default: 0 }
-},
+    mio: { type: Number, default: 0 },
+    aerox: { type: Number, default: 0 },
+    click: { type: Number, default: 0 },
+    adv: { type: Number, default: 0 }
+  },
+
+  flashSale: {
+    active: {
+      type: Boolean,
+      default: false
+    },
+
+    discountAmount: {
+      type: Number,
+      default: 0
+    },
+
+    salePrice: {
+      mio: { type: Number, default: 0 },
+      aerox: { type: Number, default: 0 },
+      click: { type: Number, default: 0 },
+      adv: { type: Number, default: 0 }
+    },
+
+    startsAt: {
+      type: Date,
+      default: null
+    },
+
+    endsAt: {
+      type: Date,
+      default: null
+    }
+  },
 
   images: [String],
   description: String,
-  // 🆕 STOCK
- stock: {
-  mio: { type: Number, default: 0 },
-  aerox: { type: Number, default: 0 },
-  click: { type: Number, default: 0 },
-  adv: { type: Number, default: 0 }
-},
 
-    // 🆕 ADD CATEGORY
+  stock: {
+    mio: { type: Number, default: 0 },
+    aerox: { type: Number, default: 0 },
+    click: { type: Number, default: 0 },
+    adv: { type: Number, default: 0 }
+  },
+
   category: {
     type: String,
     default: "general"
   },
+
   reviews: [ReviewSchema]
 });
 
