@@ -6,6 +6,13 @@ const upload = require("../utils/productUpload");
 const Order = require("../model/Order");
 const router = express.Router();
 
+function getTierDiscount(price) {
+  const amount = Number(price || 0);
+
+  if (amount <= 500) return Math.round(amount * 0.05);
+  if (amount <= 1000) return Math.round(amount * 0.07);
+  return Math.round(amount * 0.10);
+}
 async function updateFlashSaleIfNeeded() {
   const now = new Date();
 
@@ -40,30 +47,36 @@ async function updateFlashSaleIfNeeded() {
   const endsAt = new Date(now.getTime() + FLASH_DURATION);
 
   for (const p of products) {
-    const discount = Math.floor(Math.random() * 501); // ₱0–500
-
     const salePrice = {
-      mio: Math.max((p.price?.mio || 0) - discount, 1),
-      aerox: Math.max((p.price?.aerox || 0) - discount, 1),
-      click: Math.max((p.price?.click || 0) - discount, 1),
-      adv: Math.max((p.price?.adv || 0) - discount, 1)
-    };
+  mio: Math.max((p.price?.mio || 0) - getTierDiscount(p.price?.mio || 0), 1),
+  aerox: Math.max((p.price?.aerox || 0) - getTierDiscount(p.price?.aerox || 0), 1),
+  click: Math.max((p.price?.click || 0) - getTierDiscount(p.price?.click || 0), 1),
+  adv: Math.max((p.price?.adv || 0) - getTierDiscount(p.price?.adv || 0), 1)
+};
 
-    await Product.findByIdAndUpdate(p._id, {
-      $set: {
-        "flashSale.active": true,
-        "flashSale.discountAmount": discount,
-        "flashSale.salePrice": salePrice,
-        "flashSale.startsAt": startsAt,
-        "flashSale.endsAt": endsAt
-      }
-    });
+const discountAmount = Math.max(
+  getTierDiscount(p.price?.mio || 0),
+  getTierDiscount(p.price?.aerox || 0),
+  getTierDiscount(p.price?.click || 0),
+  getTierDiscount(p.price?.adv || 0)
+);
+
+await Product.findByIdAndUpdate(p._id, {
+  $set: {
+    "flashSale.active": true,
+    "flashSale.discountAmount": discountAmount,
+    "flashSale.salePrice": salePrice,
+    "flashSale.startsAt": startsAt,
+    "flashSale.endsAt": endsAt
+  }
+});
   }
 }
 // GET ALL PRODUCTS
 router.get("/", async (req, res) => {
-  await updateFlashSaleIfNeeded();
   try {
+    await updateFlashSaleIfNeeded();
+
     const products = await Product.find().limit(50);
 
     const result = products.map(p => {
