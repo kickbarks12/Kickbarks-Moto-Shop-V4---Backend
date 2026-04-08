@@ -279,5 +279,18 @@ if (prices.some(p => p < 0) || stocks.some(s => s < 0)) {
     res.status(500).json({ error: "Failed to update product" });
   }
 });
-
+await Product.updateMany({}, {
+  $set: {
+    "flashSale.active": false,
+    "flashSale.discountAmount": 0,
+    "flashSale.salePrice": {
+      mio: 0,
+      aerox: 0,
+      click: 0,
+      adv: 0
+    },
+    "flashSale.startsAt": null,
+    "flashSale.endsAt": null
+  }
+});
 module.exports = router;
