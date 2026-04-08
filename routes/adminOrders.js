@@ -81,5 +81,22 @@ router.get("/export/csv", adminAuth, async (req, res) => {
     res.status(500).json({ error: "CSV export failed" });
   }
 });
+router.get("/orders/:id", async (req, res) => {
+  try {
+    if (!req.session.adminId) {
+      return res.status(401).json({ error: "Admin not logged in" });
+    }
 
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.json(order);
+  } catch (err) {
+    console.error("ADMIN GET ORDER ERROR:", err);
+    res.status(500).json({ error: "Failed to load order" });
+  }
+});
 module.exports = router;
