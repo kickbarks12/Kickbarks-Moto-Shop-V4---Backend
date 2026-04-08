@@ -1,3 +1,4 @@
+const FLASH_DURATION = 2 * 60 * 60 * 1000; // 2 hours
 const express = require("express");
 const Product = require("../model/Product");
 const adminAuth = require("../middleware/adminAuth");
@@ -5,9 +6,63 @@ const upload = require("../utils/productUpload");
 const Order = require("../model/Order");
 const router = express.Router();
 
+async function updateFlashSaleIfNeeded() {
+  const now = new Date();
 
+  // Check if there is any active flash sale still valid
+  const active = await Product.findOne({
+    "flashSale.active": true,
+    "flashSale.endsAt": { $gt: now }
+  });
+
+  if (active) return; // still valid, do nothing
+
+  // 🔥 RESET ALL PRODUCTS
+  await Product.updateMany({}, {
+    $set: {
+      "flashSale.active": false,
+      "flashSale.discountAmount": 0,
+      "flashSale.salePrice": {
+        mio: 0,
+        aerox: 0,
+        click: 0,
+        adv: 0
+      },
+      "flashSale.startsAt": null,
+      "flashSale.endsAt": null
+    }
+  });
+
+  // 🔥 PICK RANDOM PRODUCTS
+  const products = await Product.aggregate([{ $sample: { size: 5 } }]);
+
+  const startsAt = now;
+  const endsAt = new Date(now.getTime() + FLASH_DURATION);
+
+  for (const p of products) {
+    const discount = Math.floor(Math.random() * 501); // ₱0–500
+
+    const salePrice = {
+      mio: Math.max((p.price?.mio || 0) - discount, 1),
+      aerox: Math.max((p.price?.aerox || 0) - discount, 1),
+      click: Math.max((p.price?.click || 0) - discount, 1),
+      adv: Math.max((p.price?.adv || 0) - discount, 1)
+    };
+
+    await Product.findByIdAndUpdate(p._id, {
+      $set: {
+        "flashSale.active": true,
+        "flashSale.discountAmount": discount,
+        "flashSale.salePrice": salePrice,
+        "flashSale.startsAt": startsAt,
+        "flashSale.endsAt": endsAt
+      }
+    });
+  }
+}
 // GET ALL PRODUCTS
 router.get("/", async (req, res) => {
+  await updateFlashSaleIfNeeded();
   try {
     const products = await Product.find().limit(50);
 
