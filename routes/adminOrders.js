@@ -120,35 +120,97 @@ router.get("/", adminAuth, async (req, res) => {
 // =============================
 router.get("/export/csv", adminAuth, async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find().sort({ date: -1 });
 
-    const csv = [
-  "Order Number,Customer Name,Email,Phone,Address,Items,Total,Status,Payment,Date",
-  ...orders.map(o => {
-    const items = (o.items || [])
-      .map(i => `${i.name} x${i.qty}${i.bike ? ` (${i.bike})` : ""}`)
-      .join(" | ");
+    const escapeCSV = (value) => {
+      if (value === null || value === undefined) return '""';
+      const str = String(value).replace(/"/g, '""');
+      return `"${str}"`;
+    };
 
-    return [
-      `"${o.orderNumber}"`,
-      `"${o.customerName || ""}"`,
-      `"${o.customerEmail || ""}"`,
-      `"${o.customerPhone || ""}"`,
-      `"${o.customerAddress || ""}"`,
-      `"${items}"`,
-      o.total || 0,
-      `"${o.status}"`,
-      `"${o.paymentMethod || "COD"}"`,
-      `"${new Date(o.date).toISOString()}"`
-    ].join(",");
-  })
-].join("\n");
+    const header = [
+      "Order Number",
+      "Customer Name",
+      "Email",
+      "Phone",
+      "Address",
+      "Items",
+      "Subtotal",
+      "Shipping",
+      "Discount",
+      "Voucher",
+      "Total",
+      "Payment Method",
+      "Status",
+      "Refund Status",
+      "Refund Reason",
+      "Refund Amount",
+      "Order Date"
+    ];
 
-    res.header("Content-Type", "text/csv");
-    res.attachment("orders.csv");
+    const rows = orders.map((o) => {
+      const items = (o.items || [])
+        .map((i) => {
+          const qty = i.qty || 0;
+          const price = i.price || 0;
+          const itemTotal = qty * price;
+
+          return [
+            i.name || "Unnamed Item",
+            `Qty: ${qty}`,
+            `Price: ₱${price.toLocaleString("en-PH", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}`,
+            i.bike ? `Bike: ${i.bike}` : null,
+            `Item Total: ₱${itemTotal.toLocaleString("en-PH", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}`
+          ]
+            .filter(Boolean)
+            .join(" | ");
+        })
+        .join(" || ");
+
+      return [
+        escapeCSV(o.orderNumber || ""),
+        escapeCSV(o.customerName || ""),
+        escapeCSV(o.customerEmail || ""),
+        escapeCSV(o.customerPhone || ""),
+        escapeCSV(o.customerAddress || ""),
+        escapeCSV(items),
+        escapeCSV((o.subtotal || 0).toFixed(2)),
+        escapeCSV((o.shipping || 0).toFixed(2)),
+        escapeCSV((o.discount || 0).toFixed(2)),
+        escapeCSV(o.voucher || ""),
+        escapeCSV((o.total || 0).toFixed(2)),
+        escapeCSV(o.paymentMethod || "COD"),
+        escapeCSV(o.status || "Pending"),
+        escapeCSV(o.refundStatus || "None"),
+        escapeCSV(o.refundReason || ""),
+        escapeCSV(o.refundAmount || 0),
+        escapeCSV(
+          o.date
+            ? new Date(o.date).toLocaleString("en-PH", {
+                year: "numeric",
+                month: "short",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+              })
+            : ""
+        )
+      ].join(",");
+    });
+
+    const csv = [header.join(","), ...rows].join("\n");
+
+    res.header("Content-Type", "text/csv; charset=utf-8");
+    res.header("Content-Disposition", 'attachment; filename="orders.csv"');
     res.send(csv);
   } catch (err) {
-    console.error(err);
+    console.error("CSV export failed:", err);
     res.status(500).json({ error: "CSV export failed" });
   }
 });
