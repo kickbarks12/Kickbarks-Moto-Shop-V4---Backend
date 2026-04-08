@@ -329,6 +329,7 @@ router.get("/", async (req, res) => {
     if (search) {
       query.$or = [
         { status: { $regex: search, $options: "i" } },
+        { orderNumber: { $regex: search, $options: "i" } },
         ...(search.match(/^[0-9a-fA-F]{24}$/)
           ? [{ _id: search }]
           : [])
