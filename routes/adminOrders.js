@@ -208,6 +208,7 @@ router.get("/export/csv", adminAuth, async (req, res) => {
 
     res.header("Content-Type", "text/csv; charset=utf-8");
     res.header("Content-Disposition", 'attachment; filename="orders.csv"');
+    res.write("\uFEFF");
     res.send(csv);
   } catch (err) {
     console.error("CSV export failed:", err);
