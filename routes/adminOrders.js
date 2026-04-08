@@ -208,8 +208,10 @@ router.get("/export/csv", adminAuth, async (req, res) => {
 
     res.header("Content-Type", "text/csv; charset=utf-8");
     res.header("Content-Disposition", 'attachment; filename="orders.csv"');
-    res.write("\uFEFF");
-    res.send(csv);
+    // 🔥 Put BOM directly in the CSV string instead
+const finalCSV = "\uFEFF" + csv;
+
+res.send(finalCSV);
   } catch (err) {
     console.error("CSV export failed:", err);
     res.status(500).json({ error: "CSV export failed" });
