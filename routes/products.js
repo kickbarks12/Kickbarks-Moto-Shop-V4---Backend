@@ -146,26 +146,46 @@ router.post(
   adminAuth,
   upload.array("images", 5),
   async (req, res) => {
-    const prices = [
-  Number(req.body.price_mio),
-  Number(req.body.price_aerox),
-  Number(req.body.price_click),
-  Number(req.body.price_adv)
-];
+    let price = {};
+let stock = {};
 
-const stocks = [
-  Number(req.body.stock_mio),
-  Number(req.body.stock_aerox),
-  Number(req.body.stock_click),
-  Number(req.body.stock_adv)
-];
+try {
+  price = JSON.parse(req.body.price || "{}");
+  stock = JSON.parse(req.body.stock || "{}");
+} catch (err) {
+  return res.status(400).json({ error: "Invalid price or stock format" });
+}
 
 // validate negative values
-if (prices.some(p => p < 0) || stocks.some(s => s < 0)) {
+const hasNegative =
+  Object.values(price).some(v => v < 0) ||
+  Object.values(stock).some(v => v < 0);
+
+if (hasNegative) {
   return res.status(400).json({
     error: "Price and stock cannot be negative"
   });
 }
+//     const prices = [
+//   Number(req.body.price_mio),
+//   Number(req.body.price_aerox),
+//   Number(req.body.price_click),
+//   Number(req.body.price_adv)
+// ];
+
+// const stocks = [
+//   Number(req.body.stock_mio),
+//   Number(req.body.stock_aerox),
+//   Number(req.body.stock_click),
+//   Number(req.body.stock_adv)
+// ];
+
+// // validate negative values
+// if (prices.some(p => p < 0) || stocks.some(s => s < 0)) {
+//   return res.status(400).json({
+//     error: "Price and stock cannot be negative"
+//   });
+// }
     try {
       const imagePaths = req.files
         ? req.files.map(f => f.path)
@@ -176,26 +196,13 @@ if (!req.body.name || req.body.name.length < 3) {
   });
 }
       const product = await Product.create({
-        name: req.body.name,
-        price: {
-  mio: Number(req.body.price_mio) || 0,
-  aerox: Number(req.body.price_aerox) || 0,
-  click: Number(req.body.price_click) || 0,
-  adv: Number(req.body.price_adv) || 0
-},
-
-
-        description: req.body.description,
-        category: req.body.category?.toLowerCase() || "general",
-        stock: {
-  mio: Number(req.body.stock_mio) || 0,
-  aerox: Number(req.body.stock_aerox) || 0,
-  click: Number(req.body.stock_click) || 0,
-  adv: Number(req.body.stock_adv) || 0
-},
-   
-        images: imagePaths
-      });
+  name: req.body.name,
+  price,
+  stock,
+  description: req.body.description,
+  category: req.body.category?.toLowerCase() || "general",
+  images: imagePaths
+});
 
       res.json(product);
     } catch (err) {
@@ -246,20 +253,20 @@ if (prices.some(p => p < 0) || stocks.some(s => s < 0)) {
     }
 
     // update prices
-    product.price = {
-      mio: Number(req.body.price_mio) || 0,
-      aerox: Number(req.body.price_aerox) || 0,
-      click: Number(req.body.price_click) || 0,
-      adv: Number(req.body.price_adv) || 0
-    };
+    // product.price = {
+    //   mio: Number(req.body.price_mio) || 0,
+    //   aerox: Number(req.body.price_aerox) || 0,
+    //   click: Number(req.body.price_click) || 0,
+    //   adv: Number(req.body.price_adv) || 0
+    // };
 
     // update stocks
-    product.stock = {
-      mio: Number(req.body.stock_mio) || 0,
-      aerox: Number(req.body.stock_aerox) || 0,
-      click: Number(req.body.stock_click) || 0,
-      adv: Number(req.body.stock_adv) || 0
-    };
+    // product.stock = {
+    //   mio: Number(req.body.stock_mio) || 0,
+    //   aerox: Number(req.body.stock_aerox) || 0,
+    //   click: Number(req.body.stock_click) || 0,
+    //   adv: Number(req.body.stock_adv) || 0
+    // };
 
     // if new images uploaded → replace
     if (req.files && req.files.length > 0) {
