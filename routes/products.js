@@ -88,7 +88,7 @@ router.get("/", async (req, res) => {
           : reviews.reduce((s, r) => s + r.rating, 0) / count;
 
       return {
-        ...p.toObject(),
+        ...p.toObject({ flattenMaps: true }),
         ratingAvg: avg,
         ratingCount: count
       };

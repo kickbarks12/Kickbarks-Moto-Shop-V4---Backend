@@ -11,58 +11,64 @@ const ReviewSchema = new mongoose.Schema({
   }
 });
 
-const ProductSchema = new mongoose.Schema({
-  name: String,
+const ProductSchema = new mongoose.Schema(
+  {
+    name: String,
 
-  price: {
-  type: Map,
-  of: Number,
-  default: {}
-},
-
-  flashSale: {
-    active: {
-      type: Boolean,
-      default: false
+    price: {
+      type: Map,
+      of: Number,
+      default: {}
     },
 
-    discountAmount: {
-      type: Number,
-      default: 0
+    flashSale: {
+      active: {
+        type: Boolean,
+        default: false
+      },
+
+      discountAmount: {
+        type: Number,
+        default: 0
+      },
+
+      salePrice: {
+        type: Map,
+        of: Number,
+        default: {}
+      },
+
+      startsAt: {
+        type: Date,
+        default: null
+      },
+
+      endsAt: {
+        type: Date,
+        default: null
+      }
     },
 
-    salePrice: {
-  type: Map,
-  of: Number,
-  default: {}
-},
+    images: [String],
+    description: String,
 
-    startsAt: {
-      type: Date,
-      default: null
+    stock: {
+      type: Map,
+      of: Number,
+      default: {}
     },
 
-    endsAt: {
-      type: Date,
-      default: null
-    }
+    category: {
+      type: String,
+      default: "general"
+    },
+
+    reviews: [ReviewSchema]
   },
-
-  images: [String],
-  description: String,
-
-  stock: {
-  type: Map,
-  of: Number,
-  default: {}
-},
-
-  category: {
-    type: String,
-    default: "general"
-  },
-
-  reviews: [ReviewSchema]
-});
+  {
+    toJSON: { flattenMaps: true },
+    toObject: { flattenMaps: true }
+  }
+);
 
 module.exports = mongoose.model("Product", ProductSchema);
