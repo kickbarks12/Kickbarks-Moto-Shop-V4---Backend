@@ -15,11 +15,10 @@ const ProductSchema = new mongoose.Schema({
   name: String,
 
   price: {
-    mio: { type: Number, default: 0 },
-    aerox: { type: Number, default: 0 },
-    click: { type: Number, default: 0 },
-    adv: { type: Number, default: 0 }
-  },
+  type: Map,
+  of: Number,
+  default: {}
+},
 
   flashSale: {
     active: {
@@ -33,11 +32,10 @@ const ProductSchema = new mongoose.Schema({
     },
 
     salePrice: {
-      mio: { type: Number, default: 0 },
-      aerox: { type: Number, default: 0 },
-      click: { type: Number, default: 0 },
-      adv: { type: Number, default: 0 }
-    },
+  type: Map,
+  of: Number,
+  default: {}
+},
 
     startsAt: {
       type: Date,
@@ -54,11 +52,10 @@ const ProductSchema = new mongoose.Schema({
   description: String,
 
   stock: {
-    mio: { type: Number, default: 0 },
-    aerox: { type: Number, default: 0 },
-    click: { type: Number, default: 0 },
-    adv: { type: Number, default: 0 }
-  },
+  type: Map,
+  of: Number,
+  default: {}
+},
 
   category: {
     type: String,
