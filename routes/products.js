@@ -75,7 +75,7 @@ await Product.findByIdAndUpdate(p._id, {
 // GET ALL PRODUCTS
 router.get("/", async (req, res) => {
   try {
-    // await updateFlashSaleIfNeeded();
+    await updateFlashSaleIfNeeded();
 
     const products = await Product.find().limit(50);
 
