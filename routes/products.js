@@ -146,6 +146,8 @@ router.post(
   adminAuth,
   upload.array("images", 5),
   async (req, res) => {
+    console.log("RAW BODY PRICE:", req.body.price);
+console.log("RAW BODY STOCK:", req.body.stock);
     let price = {};
     let stock = {};
 
