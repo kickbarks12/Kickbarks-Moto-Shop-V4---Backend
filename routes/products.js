@@ -147,62 +147,42 @@ router.post(
   upload.array("images", 5),
   async (req, res) => {
     let price = {};
-let stock = {};
+    let stock = {};
 
-try {
-  price = JSON.parse(req.body.price || "{}");
-  stock = JSON.parse(req.body.stock || "{}");
-} catch (err) {
-  return res.status(400).json({ error: "Invalid price or stock format" });
-}
-
-// validate negative values
-const hasNegative =
-  Object.values(price).some(v => v < 0) ||
-  Object.values(stock).some(v => v < 0);
-
-if (hasNegative) {
-  return res.status(400).json({
-    error: "Price and stock cannot be negative"
-  });
-}
-//     const prices = [
-//   Number(req.body.price_mio),
-//   Number(req.body.price_aerox),
-//   Number(req.body.price_click),
-//   Number(req.body.price_adv)
-// ];
-
-// const stocks = [
-//   Number(req.body.stock_mio),
-//   Number(req.body.stock_aerox),
-//   Number(req.body.stock_click),
-//   Number(req.body.stock_adv)
-// ];
-
-// // validate negative values
-// if (prices.some(p => p < 0) || stocks.some(s => s < 0)) {
-//   return res.status(400).json({
-//     error: "Price and stock cannot be negative"
-//   });
-// }
     try {
-      const imagePaths = req.files
-        ? req.files.map(f => f.path)
-        : [];
-if (!req.body.name || req.body.name.length < 3) {
-  return res.status(400).json({
-    error: "Product name must be at least 3 characters"
-  });
-}
+      price = JSON.parse(req.body.price || "{}");
+      stock = JSON.parse(req.body.stock || "{}");
+    } catch (err) {
+      return res.status(400).json({ error: "Invalid price or stock format" });
+    }
+
+    const hasNegative =
+      Object.values(price).some(v => Number(v) < 0) ||
+      Object.values(stock).some(v => Number(v) < 0);
+
+    if (hasNegative) {
+      return res.status(400).json({
+        error: "Price and stock cannot be negative"
+      });
+    }
+
+    try {
+      const imagePaths = req.files ? req.files.map(f => f.path) : [];
+
+      if (!req.body.name || req.body.name.length < 3) {
+        return res.status(400).json({
+          error: "Product name must be at least 3 characters"
+        });
+      }
+
       const product = await Product.create({
-  name: req.body.name,
-  price,
-  stock,
-  description: req.body.description,
-  category: req.body.category?.toLowerCase() || "general",
-  images: imagePaths
-});
+        name: req.body.name,
+        price,
+        stock,
+        description: req.body.description,
+        category: req.body.category?.toLowerCase() || "general",
+        images: imagePaths
+      });
 
       res.json(product);
     } catch (err) {
@@ -251,23 +231,6 @@ if (prices.some(p => p < 0) || stocks.some(s => s < 0)) {
     if (req.body.category) {
       product.category = req.body.category.toLowerCase();
     }
-
-    // update prices
-    // product.price = {
-    //   mio: Number(req.body.price_mio) || 0,
-    //   aerox: Number(req.body.price_aerox) || 0,
-    //   click: Number(req.body.price_click) || 0,
-    //   adv: Number(req.body.price_adv) || 0
-    // };
-
-    // update stocks
-    // product.stock = {
-    //   mio: Number(req.body.stock_mio) || 0,
-    //   aerox: Number(req.body.stock_aerox) || 0,
-    //   click: Number(req.body.stock_click) || 0,
-    //   adv: Number(req.body.stock_adv) || 0
-    // };
-
     // if new images uploaded → replace
     if (req.files && req.files.length > 0) {
       product.images = req.files.map(f => f.path);
