@@ -197,43 +197,47 @@ console.log("RAW BODY STOCK:", req.body.stock);
    EDIT PRODUCT (ADMIN)
 ========================= */
 router.put("/:id", adminAuth, upload.array("images", 5), async (req, res) => {
-  const prices = [
-  Number(req.body.price_mio),
-  Number(req.body.price_aerox),
-  Number(req.body.price_click),
-  Number(req.body.price_adv)
-];
 
-const stocks = [
-  Number(req.body.stock_mio),
-  Number(req.body.stock_aerox),
-  Number(req.body.stock_click),
-  Number(req.body.stock_adv)
-];
+  let price = {};
+  let stock = {};
 
-if (prices.some(p => p < 0) || stocks.some(s => s < 0)) {
-  return res.status(400).json({
-    error: "Price and stock cannot be negative"
-  });
-}
-  if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+  try {
+    price = JSON.parse(req.body.price || "{}");
+    stock = JSON.parse(req.body.stock || "{}");
+  } catch (err) {
+    return res.status(400).json({ error: "Invalid price or stock format" });
+  }
+
+  const hasNegative =
+    Object.values(price).some(v => Number(v) < 0) ||
+    Object.values(stock).some(v => Number(v) < 0);
+
+  if (hasNegative) {
     return res.status(400).json({
-      error: "Invalid product ID"
+      error: "Price and stock cannot be negative"
     });
   }
+
+  if (!require("mongoose").Types.ObjectId.isValid(req.params.id)) {
+    return res.status(400).json({ error: "Invalid product ID" });
+  }
+
   try {
     const product = await Product.findById(req.params.id);
     if (!product) return res.status(404).json({ error: "Product not found" });
 
-    // update name & description
+    // basic fields
     if (req.body.name) product.name = req.body.name;
     if (req.body.description) product.description = req.body.description;
-
-    // update category
     if (req.body.category) {
       product.category = req.body.category.toLowerCase();
     }
-    // if new images uploaded → replace
+
+    // 🔥 IMPORTANT
+    product.price = price;
+    product.stock = stock;
+
+    // images
     if (req.files && req.files.length > 0) {
       product.images = req.files.map(f => f.path);
     }
