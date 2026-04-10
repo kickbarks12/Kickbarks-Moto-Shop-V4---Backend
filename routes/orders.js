@@ -12,7 +12,22 @@ const mongoose = require("mongoose");
 
 
 
+function normalizeBikeKey(bike) {
+  return String(bike || "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
 
+function getMapValue(mapLike, key) {
+  if (!mapLike || !key) return 0;
+
+  if (typeof mapLike.get === "function") {
+    return Number(mapLike.get(key) || 0);
+  }
+
+  return Number(mapLike[key] || 0);
+}
 const orderLimiter = rateLimit({
  windowMs: 10 * 60 * 1000,
  max: 20,
@@ -73,13 +88,6 @@ if (recentOrder) {
   return res.status(429).json({
     error: "Order already placed. Please wait a moment."
   });
-}
-
-function normalizeBikeKey(bike) {
-  return String(bike || "")
-    .toLowerCase()
-    .replace(/\s+/g, "")
-    .replace(/[^a-z0-9]/g, "");
 }
 
     // 1️⃣ Subtotal
@@ -149,7 +157,15 @@ for (const item of items) {
   }
 
 const bikeKey = normalizeBikeKey(item.bike);
-const availableStock = Number(product.stock?.[bikeKey] || 0);
+const availableStock = getMapValue(product.stock, bikeKey);
+
+console.log("ORDER STOCK CHECK:", {
+  product: product.name,
+  bike: item.bike,
+  bikeKey,
+  availableStock,
+  rawStock: product.stock
+});
 
 if (availableStock < Number(item.qty)) {
   return res.status(400).json({
