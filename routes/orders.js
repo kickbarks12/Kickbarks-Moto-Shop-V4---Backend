@@ -75,6 +75,12 @@ if (recentOrder) {
   });
 }
 
+function normalizeBikeKey(bike) {
+  return String(bike || "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
 
     // 1️⃣ Subtotal
 let subtotal = 0;
@@ -142,14 +148,8 @@ for (const item of items) {
     });
   }
 
-  const bike = (item.bike || "").toLowerCase();
-
-let availableStock = 0;
-
-if (bike.includes("mio")) availableStock = product.stock?.mio || 0;
-else if (bike.includes("aerox")) availableStock = product.stock?.aerox || 0;
-else if (bike.includes("click")) availableStock = product.stock?.click || 0;
-else if (bike.includes("adv")) availableStock = product.stock?.adv || 0;
+const bikeKey = normalizeBikeKey(item.bike);
+const availableStock = Number(product.stock?.[bikeKey] || 0);
 
 if (availableStock < Number(item.qty)) {
   return res.status(400).json({
@@ -210,21 +210,13 @@ paymentMethod: paymentMethod || "COD" // ✅ add this
 
 // 📦 AUTO DEDUCT STOCK
 for (const item of items) {
-  const bike = (item.bike || "").toLowerCase();
-let updateField = "";
+  const bikeKey = normalizeBikeKey(item.bike);
+  const updateField = `stock.${bikeKey}`;
 
-if (bike.includes("mio")) updateField = "stock.mio";
-else if (bike.includes("aerox")) updateField = "stock.aerox";
-else if (bike.includes("click")) updateField = "stock.click";
-else if (bike.includes("adv")) updateField = "stock.adv";
-
-if (updateField) {
   await Product.findByIdAndUpdate(
     item.productId || item._id,
-    { $inc: { [updateField]: -item.qty } }
+    { $inc: { [updateField]: -Number(item.qty) } }
   );
-}
-
 }
 
 // 🔒 Mark voucher as used AFTER order is safely created
