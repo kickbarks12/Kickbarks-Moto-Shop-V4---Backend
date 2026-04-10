@@ -3,7 +3,6 @@ const express = require("express");
 const Product = require("../model/Product");
 const adminAuth = require("../middleware/adminAuth");
 const upload = require("../utils/productUpload");
-const Order = require("../model/Order");
 const router = express.Router();
 
 function getTierDiscount(price) {
@@ -11,7 +10,7 @@ function getTierDiscount(price) {
 
   if (amount <= 500) return Math.round(amount * 0.03);
   if (amount <= 1000) return Math.round(amount * 0.05);
-  return Math.round(amount * 0.8);
+  return Math.round(amount * 0.08);
 }
 async function updateFlashSaleIfNeeded() {
   const now = new Date();
@@ -29,12 +28,7 @@ async function updateFlashSaleIfNeeded() {
     $set: {
       "flashSale.active": false,
       "flashSale.discountAmount": 0,
-      "flashSale.salePrice": {
-        mio: 0,
-        aerox: 0,
-        click: 0,
-        adv: 0
-      },
+      "flashSale.salePrice": {},
       "flashSale.startsAt": null,
       "flashSale.endsAt": null
     }
@@ -47,19 +41,25 @@ async function updateFlashSaleIfNeeded() {
   const endsAt = new Date(now.getTime() + FLASH_DURATION);
 
   for (const p of products) {
-    const salePrice = {
-  mio: Math.max((p.price?.mio || 0) - getTierDiscount(p.price?.mio || 0), 1),
-  aerox: Math.max((p.price?.aerox || 0) - getTierDiscount(p.price?.aerox || 0), 1),
-  click: Math.max((p.price?.click || 0) - getTierDiscount(p.price?.click || 0), 1),
-  adv: Math.max((p.price?.adv || 0) - getTierDiscount(p.price?.adv || 0), 1)
-};
+  const priceObj = p.price || {};
+const salePrice = {};
+let discountAmount = 0;
 
-const discountAmount = Math.max(
-  getTierDiscount(p.price?.mio || 0),
-  getTierDiscount(p.price?.aerox || 0),
-  getTierDiscount(p.price?.click || 0),
-  getTierDiscount(p.price?.adv || 0)
-);
+Object.entries(priceObj).forEach(([key, value]) => {
+  const original = Number(value || 0);
+
+  if (original <= 0) {
+    salePrice[key] = 0;
+    return;
+  }
+
+  const discount = getTierDiscount(original);
+  salePrice[key] = Math.max(original - discount, 1);
+
+  if (discount > discountAmount) {
+    discountAmount = discount;
+  }
+});
 
 await Product.findByIdAndUpdate(p._id, {
   $set: {
@@ -117,7 +117,7 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json(product);
+    res.json(product.toObject({ flattenMaps: true }));
   } catch (err) {
     res.status(400).json({ error: "Invalid product ID" });
   }
