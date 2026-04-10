@@ -9,9 +9,9 @@ const router = express.Router();
 function getTierDiscount(price) {
   const amount = Number(price || 0);
 
-  if (amount <= 500) return Math.round(amount * 0.05);
-  if (amount <= 1000) return Math.round(amount * 0.07);
-  return Math.round(amount * 0.10);
+  if (amount <= 500) return Math.round(amount * 0.03);
+  if (amount <= 1000) return Math.round(amount * 0.05);
+  return Math.round(amount * 0.8);
 }
 async function updateFlashSaleIfNeeded() {
   const now = new Date();
@@ -41,7 +41,7 @@ async function updateFlashSaleIfNeeded() {
   });
 
   // 🔥 PICK RANDOM PRODUCTS
-  const products = await Product.aggregate([{ $sample: { size: 5 } }]);
+  const products = await Product.aggregate([{ $sample: { size: 3 } }]);
 
   const startsAt = now;
   const endsAt = new Date(now.getTime() + FLASH_DURATION);
