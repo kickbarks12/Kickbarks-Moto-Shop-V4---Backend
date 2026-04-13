@@ -1,7 +1,8 @@
 # env files
 .env
 backend/.env
-
+.env.test
+tests/.env.test
 # node modules
 node_modules/
 

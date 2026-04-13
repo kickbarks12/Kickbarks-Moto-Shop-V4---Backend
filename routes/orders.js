@@ -249,7 +249,8 @@ res.json({
 });
 
 // 🔥 SEND EMAILS IN BACKGROUND
-setTimeout(async () => {
+if (process.env.NODE_ENV !== "test") {
+  setTimeout(async () => {
   try {
     console.log("STEP 1: sending customer receipt");
 
@@ -281,7 +282,7 @@ setTimeout(async () => {
     console.error("EMAIL BACKGROUND ERROR:", err);
   }
 }, 1000);
-
+}
 
 
 
