@@ -1,4 +1,4 @@
-const FLASH_DURATION = 2 * 60 * 60 * 1000; // 2 hours
+const FLASH_DURATION = 1 * 60 * 60 * 1000; // 2 hours
 const express = require("express");
 const Product = require("../model/Product");
 const adminAuth = require("../middleware/adminAuth");
